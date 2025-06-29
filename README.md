@@ -19,8 +19,8 @@ chmod +x repo-sync.sh
 ./repo-sync.sh --help
 ```
 
-### 🎤 [@reposync/nsync](./packages/nsync/)
-**Modern CLI Tool (*NSYNC Style!)**
+### [@reposync/nsync](./packages/nsync/)
+**Modern CLI Tool**
 - Built with modern UnJS ecosystem (citty, c12, consola)
 - TypeScript implementation with excellent DX
 - Rich terminal UI with progress indicators
