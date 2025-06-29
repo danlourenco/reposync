@@ -46,13 +46,16 @@
     "zod": "^3.23.8",
     "ufo": "^1.5.4",
     "destr": "^2.0.3",
-    "perfect-debounce": "^1.0.0"
+    "perfect-debounce": "^1.0.0",
+    "semver": "^7.6.3",
+    "yaml": "^2.5.1"
   },
   "devDependencies": {
     "@types/figlet": "^1.5.8",
     "@types/gradient-string": "^1.1.6",
     "@types/minimatch": "^5.1.2",
     "@types/node": "^20.14.10",
+    "@types/semver": "^7.5.8",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
     "@typescript-eslint/parser": "^7.15.0",
     "@vitest/coverage-v8": "^2.0.2",
