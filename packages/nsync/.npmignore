@@ -1,0 +1,38 @@
+# Development files
+src/
+*.test.ts
+*.spec.ts
+test/
+tests/
+.github/
+.vscode/
+docs/
+*.md
+!README.md
+
+# Build artifacts
+tsconfig.json
+vitest.config.ts
+eslint.config.js
+unbuild.config.ts
+
+# Development dependencies causing warnings
+# These are only needed for development, not runtime
+node_modules/
+.git/
+.gitignore
+.eslintrc*
+.prettierrc*
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env*
+!.env.example

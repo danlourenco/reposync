@@ -1,0 +1,35 @@
+{
+  "name": "@reposync/shell-sync",
+  "version": "1.0.0",
+  "description": "Shell script implementation of multi-repository synchronization tool",
+  "type": "module",
+  "main": "repo-sync.sh",
+  "bin": {
+    "repo-sync": "./repo-sync.sh"
+  },
+  "scripts": {
+    "build": "echo \"No build needed for shell script\"",
+    "test": "echo \"No tests for shell script implementation\"",
+    "lint": "shellcheck repo-sync.sh || echo \"shellcheck not available\"",
+    "clean": "echo \"Nothing to clean for shell script\""
+  },
+  "keywords": [
+    "git",
+    "sync",
+    "repository",
+    "shell",
+    "bash"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "preferGlobal": true
+}

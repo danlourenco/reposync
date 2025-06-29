@@ -1,0 +1,13 @@
+{
+  "source_repo": "https://github.com/company/repo-a.git",
+  "target_repos": [
+    {
+      "name": "Repo B",
+      "url": "https://github.com/company/repo-b.git"
+    },
+    {
+      "name": "Repo C",
+      "url": "https://github.com/company/repo-c.git"
+    }
+  ]
+}

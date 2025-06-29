@@ -1,0 +1,32 @@
+{
+  "source_repo": "https://github.com/danlourenco/test-reposync.git",
+  "target_repos": [
+    {
+      "name": "danlourenco/test-reposync-b",
+      "url": "https://github.com/danlourenco/test-reposync-b.git"
+    }
+  ],
+  "github": {
+    "token": "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"
+  },
+  "file_preservation": [
+    {
+      "files": [
+        "InfrastructureAsCodeFile*"
+      ],
+      "description": "Preserve and update infrastructure configuration files",
+      "update_rules": [
+        {
+          "name": "artifact_versions",
+          "type": "pattern",
+          "pattern": "{prefix}-{version}.{ext}",
+          "fields": [
+            "remote_artifact",
+            "backup_tool"
+          ],
+          "version_strategy": "replace_if_newer"
+        }
+      ]
+    }
+  ]
+}

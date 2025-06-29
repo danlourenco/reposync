@@ -1,0 +1,9 @@
+{
+  "source_repo": "https://github.com/danlourenco/test-reposync",
+  "target_repos": [
+    {
+      "name": "https://github.com/danlourenco/test-reposync-b",
+      "url": "https://github.com/danlourenco/test-reposync-b"
+    }
+  ]
+}
