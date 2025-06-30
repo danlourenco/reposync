@@ -163,7 +163,7 @@ export class GitService {
       const tempDir = await mkdtemp(join(tmpdir(), prefix))
       gitLogger.debug(`Created temporary directory: ${tempDir}`)
       return tempDir
-    } catch (error) {
+    } catch {
       throw new RepoSyncError('Failed to create temporary directory', 'TEMP_DIR_FAILED')
     }
   }
@@ -383,7 +383,7 @@ export class GitService {
         remoteUrl: originRemote?.refs?.fetch || 'unknown',
         lastCommit: log.latest?.hash || 'unknown'
       }
-    } catch (error) {
+    } catch {
       throw new RepoSyncError('Failed to get repository info', 'REPO_INFO_FAILED')
     }
   }
@@ -429,7 +429,7 @@ export class GitService {
     try {
       const { mkdir } = await import('fs/promises')
       await mkdir(dirPath, { recursive: true })
-    } catch (error) {
+    } catch {
       // Directory might already exist, that's okay
     }
   }

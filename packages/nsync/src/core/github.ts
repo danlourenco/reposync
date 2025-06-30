@@ -190,7 +190,7 @@ export class GitHubService {
         name: repo,
         fullName: `${owner}/${repo}`
       }
-    } catch (error) {
+    } catch {
       throw new RepoSyncError(
         `Failed to parse repository URL: ${repoUrl}`,
         'INVALID_REPO_URL',
@@ -485,7 +485,7 @@ This PR contains an automated sync from the canonical repository **${repoName}**
         login: data.login,
         name: data.name || data.login
       }
-    } catch (error) {
+    } catch {
       throw new RepoSyncError('Failed to get user info', 'GITHUB_AUTH_FAILED')
     }
   }
