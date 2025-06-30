@@ -1,5 +1,4 @@
 import figlet from 'figlet'
-import gradient from 'gradient-string'
 import chalk from 'chalk'
 import boxen from 'boxen'
 import { promisify } from 'util'
@@ -22,14 +21,10 @@ export const animations = {
 export async function createNsyncLogo(): Promise<string> {
   try {
     // Create the NSYNC text with figlet using a wider, more stylized font
-    const nsyncText = await figletAsync('NSYNC', {
-      font: 'Big Money-nw',
-      horizontalLayout: 'default',
-      verticalLayout: 'default'
-    })
+    const nsyncText = await figletAsync('NSYNC')
     
     // Apply solid colors: dark blue for first N, light blue for rest
-    const lines = nsyncText.split('\n')
+    const lines = (nsyncText as string).split('\n')
     const coloredLines = lines.map(line => {
       // The first N in 'Big Money-nw' font ends at a different position without the asterisk
       const firstNEnd = 14 // Adjusted for no asterisk
@@ -42,12 +37,8 @@ export async function createNsyncLogo(): Promise<string> {
   } catch (error) {
     // Fallback to 5 Line Oblique if Big Money-nw fails
     try {
-      const fallbackText = await figletAsync('NSYNC', {
-        font: '5 Line Oblique',
-        horizontalLayout: 'default',
-        verticalLayout: 'default'
-      })
-      const lines = fallbackText.split('\n')
+      const fallbackText = await figletAsync('NSYNC')
+      const lines = (fallbackText as string).split('\n')
       const coloredLines = lines.map(line => {
         // For 5 Line Oblique font, first N ends around position 8
         const firstNEnd = Math.min(8, Math.floor(line.length * 0.2))

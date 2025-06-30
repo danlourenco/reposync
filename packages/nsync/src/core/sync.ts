@@ -4,7 +4,7 @@ import { GitService } from './git.js'
 import { GitHubService } from './github.js'
 import { FileSyncService } from './file-sync.js'
 import { SyncOptions, SyncSummary, SyncResult, TargetRepository, SyncConfig, RepoSyncError } from './types.js'
-import consola, { syncLogger, gitLogger, githubLogger, operation } from '../utils/logger.js'
+import consola, { syncLogger, operation } from '../utils/logger.js'
 
 /**
  * Main synchronization service that orchestrates the sync workflow
@@ -141,7 +141,7 @@ export class SyncService {
     // Get selected tag with interactive selection
     let selectedTag = options.tag
     if (!selectedTag) {
-      selectedTag = await this.selectTag(config.source_repo, options.dryRun, options.interactive)
+      selectedTag = await this.selectTag(config.source_repo, options.dryRun || false, options.interactive)
     }
     
     // Show sync plan preview
@@ -154,7 +154,7 @@ export class SyncService {
     
     try {
       // Clone source repository
-      sourceDir = await this.cloneSourceRepository(config.source_repo, selectedTag, options.dryRun, options.verbose || false)
+      sourceDir = await this.cloneSourceRepository(config.source_repo, selectedTag, options.dryRun || false, options.verbose || false)
       
       // Process each target repository with progress tracking
       for (let i = 0; i < config.target_repos.length; i++) {
@@ -436,9 +436,8 @@ export class SyncService {
         
         // Apply augmentation rules
         const augmentationContext = {
-          tag: selectedTag,
-          version: version,
-          ...templateVars
+          ...templateVars,
+          version: version
         }
         const augmentedCount = await this.fileSyncService.augmentFiles(
           targetTempDir,

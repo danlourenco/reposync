@@ -1,6 +1,40 @@
 import { Octokit } from '@octokit/rest'
-import consola, { githubLogger, log } from '../utils/logger.js'
+import { githubLogger } from '../utils/logger.js'
 import { GitTag, RepoInfo, RepoSyncError } from './types.js'
+
+/**
+ * Repository information for user repositories
+ */
+export interface UserRepository {
+  id: number
+  name: string
+  full_name: string
+  description: string | null
+  private: boolean
+  clone_url: string
+  ssh_url: string
+  html_url: string
+  archived: boolean
+  disabled: boolean
+  fork: boolean
+  default_branch: string
+  updated_at: string | null
+  pushed_at: string | null
+  permissions?: {
+    admin?: boolean
+    push?: boolean
+    pull?: boolean
+  }
+}
+
+/**
+ * Repository search result
+ */
+export interface RepositorySearchResult {
+  total_count: number
+  incomplete_results: boolean
+  items: UserRepository[]
+}
 
 /**
  * Options for creating a pull request
@@ -372,7 +406,7 @@ export class GitHubService {
     // Extract repo name from URL for cleaner display
     const repoName = sourceRepo.replace(/.*github\.com[:/]([^/]+\/[^/]+)(\.git)?$/, '$1').replace(/\.git$/, '')
     
-    return `## 🔄 *NSYNC Repository Synchronization
+    return `## 🔄 NSYNC Repository Synchronization
 
 **Source Tag:** \`${sourceTag}\`  
 **Sync Timestamp:** \`${timestamp}\`  
@@ -402,7 +436,7 @@ This PR contains an automated sync from the canonical repository **${repoName}**
 2. Run any necessary tests or validations${infrastructureFileUpdated ? '\n3. Verify infrastructure file version updates\n4. Merge when ready to deploy' : '\n3. Merge when ready to deploy'}
 
 ---
-*This PR was created automatically by the \*NSYNC CLI tool*`
+*This PR was created automatically by the *NSYNC CLI tool*`
   }
 
   /**
@@ -422,7 +456,7 @@ This PR contains an automated sync from the canonical repository **${repoName}**
    */
   async validateAuthentication(): Promise<boolean> {
     try {
-      await this.octokit.rest.user.getAuthenticated()
+      await this.octokit.rest.users.getAuthenticated()
       return true
     } catch (error) {
       githubLogger.debug(`GitHub authentication failed: ${error}`)
@@ -446,7 +480,7 @@ This PR contains an automated sync from the canonical repository **${repoName}**
    */
   async getAuthenticatedUser(): Promise<{ login: string; name: string }> {
     try {
-      const { data } = await this.octokit.rest.user.getAuthenticated()
+      const { data } = await this.octokit.rest.users.getAuthenticated()
       return {
         login: data.login,
         name: data.name || data.login
@@ -551,8 +585,8 @@ This PR contains an automated sync from the canonical repository **${repoName}**
         disabled: repo.disabled,
         fork: repo.fork,
         default_branch: repo.default_branch,
-        updated_at: repo.updated_at,
-        pushed_at: repo.pushed_at,
+        updated_at: repo.updated_at || null,
+        pushed_at: repo.pushed_at || null,
         permissions: repo.permissions
       }))
 

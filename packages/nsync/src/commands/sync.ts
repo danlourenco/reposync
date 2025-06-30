@@ -2,7 +2,7 @@ import { defineCommand } from 'citty'
 import { ConfigManager } from '../core/config.js'
 import { SyncService } from '../core/sync.js'
 import { SyncSummary } from '../core/types.js'
-import consola, { setVerbose, setSilent, operation, syncLogger } from '../utils/logger.js'
+import consola, { setVerbose, operation } from '../utils/logger.js'
 import boxen from 'boxen'
 import chalk from 'chalk'
 
@@ -104,7 +104,7 @@ function displayDryRunSummary(summary: SyncSummary) {
 /**
  * Execute sync with clean UI using consola's elegant approach
  */
-async function executeCleanSync(syncService: any, options: any): Promise<SyncSummary> {
+async function executeCleanSync(syncService: SyncService, options: Record<string, unknown>): Promise<SyncSummary> {
   // Set consola to quiet mode (only show warnings and errors)
   const originalLevel = consola.level
   consola.level = 1 // Only warnings and errors

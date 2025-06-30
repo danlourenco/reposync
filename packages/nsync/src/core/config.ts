@@ -1,9 +1,8 @@
 import { loadConfig } from 'c12'
 import { resolve } from 'pathe'
-import { defu } from 'defu'
 import { writeFileSync, existsSync } from 'fs'
 import { SyncConfig, SyncConfigSchema } from './types.js'
-import consola, { configLogger } from '../utils/logger.js'
+import { configLogger } from '../utils/logger.js'
 
 export interface ConfigOptions {
   configPath?: string
@@ -31,7 +30,6 @@ export class ConfigManager {
       const { config } = await loadConfig<SyncConfig>({
         name: DEFAULT_CONFIG_NAME,
         configFile: this.configPath,
-        defaults: {},
       })
 
       if (!config || Object.keys(config).length === 0) {

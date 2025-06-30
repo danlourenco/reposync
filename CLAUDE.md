@@ -145,7 +145,7 @@ Test configuration files are provided:
 
 - Follow this recommended workflow: Write tests, commit; code, iterate, commit
 - Write tests based on expected input/output pairs. We're adopting test-driven development; avoids creating mock implementations for functionality that doesn’t exist yet in the codebase.
-- Then,  run the tests and confirm they fail. Do not write any implementatiojn code yet.
+- Then,  run the tests and confirm they fail. Do not write any implementation code yet.
 - Commit the tests when the user is satisfied with them.
 - Next, write code that passes the tests; do NOT modify the tests. Keep going until all tests pass. 
 - Please verify with independent subagents that the implementation isn’t overfitting to the tests

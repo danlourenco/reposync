@@ -10,7 +10,7 @@ import { readFile, writeFile } from 'fs/promises'
 import { join, relative } from 'pathe'
 import { existsSync } from 'fs'
 import { minimatch } from 'minimatch'
-import consola, { fileLogger, log } from '../utils/logger.js'
+import { fileLogger } from '../utils/logger.js'
 import { RepoSyncError } from './types.js'
 
 /**
@@ -334,7 +334,7 @@ export class FileUpdateService {
     content: string,
     rule: UpdateRule,
     syncVersion: string,
-    templateVars: Record<string, string>
+    _templateVars: Record<string, string>
   ): UpdateRuleResult {
     if (!rule.pattern || !rule.fields) {
       return { content, modified: false, changes: [] }
@@ -512,7 +512,7 @@ export class FileUpdateService {
       }
       
       // Process replacement template with named groups and other variables
-      const processedReplacement = this.processTemplate(rule.replacement, { 
+      const processedReplacement = this.processTemplate(rule.replacement || '', { 
         ...templateVars, 
         sync_version: syncVersion,
         ...namedGroups  // Add captured groups to template variables
@@ -545,7 +545,7 @@ export class FileUpdateService {
     }
     
     // Generic handling for other patterns
-    let regexPattern = pattern
+    const regexPattern = pattern
       // Escape regex special characters first, except our placeholders
       .replace(/[.+?^${}()|[\]\\]/g, (match) => {
         // Don't escape our template placeholders
@@ -627,7 +627,7 @@ export class FileUpdateService {
     // Process template functions
     result = result.replace(/(\w+)\(([^)]+)\)/g, (match, funcName, args) => {
       if (funcName in templateFunctions) {
-        const argList = args.split(',').map(arg => arg.trim().replace(/['"]/g, ''))
+        const argList = args.split(',').map((arg: string) => arg.trim().replace(/['"]/g, ''))
         return (templateFunctions as any)[funcName](...argList)
       }
       return match

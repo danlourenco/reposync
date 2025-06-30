@@ -251,7 +251,7 @@ describe('ConfigManager', () => {
         await configManager.load()
         expect.fail('Should have thrown an error')
       } catch (error) {
-        expect(error.message).toContain('Configuration validation failed')
+        expect((error as Error).message).toContain('Configuration validation failed')
       }
     })
   })

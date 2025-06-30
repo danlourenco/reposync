@@ -169,7 +169,7 @@ describe('RuleLoader', () => {
       
       // Mock to return true for all the paths that will be checked
       mockExistsSync.mockImplementation((path) => {
-        return path.includes('.reposync/rules.yaml') || path === '/custom/rules.yaml'
+        return (path as string).includes('.reposync/rules.yaml') || path === '/custom/rules.yaml'
       })
       
       mockLoadConfig.mockReset()
