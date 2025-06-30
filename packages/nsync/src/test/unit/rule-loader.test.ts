@@ -26,6 +26,8 @@ describe('RuleLoader', () => {
   beforeEach(() => {
     ruleLoader = new RuleLoader()
     vi.clearAllMocks()
+    // Reset the loader's internal state
+    ruleLoader.reset()
   })
 
   afterEach(() => {
@@ -85,6 +87,7 @@ describe('RuleLoader', () => {
         path === './.reposync/rules.yaml'
       )
       
+      mockLoadConfig.mockReset()
       mockLoadConfig
         .mockResolvedValueOnce({ config: {} })
         .mockResolvedValueOnce({
@@ -117,11 +120,11 @@ describe('RuleLoader', () => {
         path === '/custom/rules.yaml'
       )
       
+      // Reset mock and setup for this specific test
+      mockLoadConfig.mockReset()
       mockLoadConfig
-        .mockResolvedValueOnce({ config: {} }) // global
-        .mockResolvedValueOnce({ config: {} }) // project  
-        .mockResolvedValueOnce({ config: {} }) // main
-        .mockResolvedValueOnce({              // env
+        .mockResolvedValueOnce({ config: {} }) // main config (no rcFile check)
+        .mockResolvedValueOnce({              // env path
           config: {
             file_augmentation: {
               rules: envRules
@@ -130,7 +133,7 @@ describe('RuleLoader', () => {
         })
 
       const rules = await ruleLoader.loadRules()
-
+      
       expect(rules).toEqual(envRules)
     })
 
@@ -153,20 +156,42 @@ describe('RuleLoader', () => {
         }
       ]
 
-      mockExistsSync.mockReturnValue(true)
+      const envRules = [
+        {
+          name: 'Env Rule',
+          target_files: ['*.json'],
+          conditions: [],
+          actions: []
+        }
+      ]
+
+      process.env.REPOSYNC_RULES_PATH = '/custom/rules.yaml'
       
+      // Mock to return true for all the paths that will be checked
+      mockExistsSync.mockImplementation((path) => {
+        return path.includes('.reposync/rules.yaml') || path === '/custom/rules.yaml'
+      })
+      
+      mockLoadConfig.mockReset()
       mockLoadConfig
         .mockResolvedValueOnce({
           config: { file_augmentation: { rules: globalRules } }
-        })
+        })  // global config
         .mockResolvedValueOnce({
           config: { file_augmentation: { rules: projectRules } }
-        })
-        .mockResolvedValue({ config: {} })
+        })  // project config
+        .mockResolvedValueOnce({ config: {} })  // main config
+        .mockResolvedValueOnce({
+          config: { file_augmentation: { rules: envRules } }
+        })  // env config
 
       const rules = await ruleLoader.loadRules()
 
-      expect(rules).toEqual([...globalRules, ...projectRules])
+      // Should have all rules from all sources
+      expect(rules).toHaveLength(3)
+      expect(rules.map(r => r.name)).toEqual(['Global Rule', 'Project Rule', 'Env Rule'])
+      
+      delete process.env.REPOSYNC_RULES_PATH
     })
 
     it('should filter out disabled rules', async () => {
@@ -194,9 +219,13 @@ describe('RuleLoader', () => {
       ]
 
       mockExistsSync.mockReturnValue(false)
-      mockLoadConfig.mockResolvedValue({
-        config: { file_augmentation: { rules } }
-      })
+      
+      // Only main config will be called since existsSync returns false
+      mockLoadConfig.mockReset()
+      mockLoadConfig
+        .mockResolvedValueOnce({
+          config: { file_augmentation: { rules } }
+        })  // main config with the rules
 
       const loadedRules = await ruleLoader.loadRules()
 
@@ -215,23 +244,28 @@ describe('RuleLoader', () => {
       ]
 
       mockExistsSync.mockReturnValue(false)
-      mockLoadConfig.mockResolvedValue({
-        config: { file_augmentation: { rules } }
-      })
+      
+      // Only main config will be called since existsSync returns false
+      mockLoadConfig.mockReset()
+      mockLoadConfig
+        .mockResolvedValueOnce({
+          config: { file_augmentation: { rules } }
+        })  // main config
 
       // First call
       const firstLoad = await ruleLoader.loadRules()
       
-      // Second call
+      // Second call (should use cache)
       const secondLoad = await ruleLoader.loadRules()
 
       expect(firstLoad).toEqual(secondLoad)
-      // loadConfig should be called multiple times on first load but not on second
-      expect(mockLoadConfig).not.toHaveBeenCalledTimes(8) // 4 sources × 2 calls
+      // loadConfig should be called 1 time (only main config, on first load)
+      expect(mockLoadConfig).toHaveBeenCalledTimes(1)
     })
 
     it('should handle load errors gracefully', async () => {
       mockExistsSync.mockReturnValue(true)
+      mockLoadConfig.mockReset()
       mockLoadConfig.mockRejectedValue(new Error('Load failed'))
 
       const rules = await ruleLoader.loadRules()
@@ -250,7 +284,7 @@ describe('RuleLoader', () => {
           actions: []
         },
         {
-          name: 'config.yml Rule',
+          name: 'Config Rule',
           target_files: ['config.yml', 'config.yml.*'],
           conditions: [],
           actions: []
@@ -264,9 +298,13 @@ describe('RuleLoader', () => {
       ]
 
       mockExistsSync.mockReturnValue(false)
-      mockLoadConfig.mockResolvedValue({
-        config: { file_augmentation: { rules } }
-      })
+      
+      // Only main config will be called since existsSync returns false
+      mockLoadConfig.mockReset()
+      mockLoadConfig
+        .mockResolvedValueOnce({
+          config: { file_augmentation: { rules } }
+        })  // main config with rules
 
       await ruleLoader.loadRules()
     })
@@ -279,15 +317,16 @@ describe('RuleLoader', () => {
 
     it('should return matching rules for config.yml', () => {
       const rules = ruleLoader.getRulesByFile('config.yml')
-      expect(rules).toHaveLength(1)
-      expect(rules[0].name).toBe('config.yml Rule')
+      expect(rules).toHaveLength(2) // Both YAML Rule and Config Rule match
+      expect(rules.map(r => r.name)).toContain('YAML Rule')
+      expect(rules.map(r => r.name)).toContain('Config Rule')
     })
 
     it('should return matching rules for config.yml variants', () => {
       const rules = ruleLoader.getRulesByFile('config.yml.yaml')
       expect(rules).toHaveLength(2) // Both YAML and config.yml rules
       expect(rules.map(r => r.name)).toContain('YAML Rule')
-      expect(rules.map(r => r.name)).toContain('config.yml Rule')
+      expect(rules.map(r => r.name)).toContain('Config Rule')
     })
 
     it('should return no rules for non-matching files', () => {
@@ -308,9 +347,11 @@ describe('RuleLoader', () => {
       ]
 
       mockExistsSync.mockReturnValue(false)
-      mockLoadConfig.mockResolvedValue({
-        config: { file_augmentation: { rules } }
-      })
+      mockLoadConfig.mockReset()
+      mockLoadConfig
+        .mockResolvedValue({
+          config: { file_augmentation: { rules } }
+        })  // main config (used for both calls)
 
       // Load rules
       await ruleLoader.loadRules()

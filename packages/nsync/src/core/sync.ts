@@ -434,7 +434,19 @@ export class SyncService {
           dryRun
         )
         
-        const infrastructureFileUpdated = updateResults.some(r => r.modified)
+        // Apply augmentation rules
+        const augmentationContext = {
+          tag: selectedTag,
+          version: version,
+          ...templateVars
+        }
+        const augmentedCount = await this.fileSyncService.augmentFiles(
+          targetTempDir,
+          augmentationContext,
+          dryRun
+        )
+        
+        const infrastructureFileUpdated = updateResults.some(r => r.modified) || augmentedCount > 0
         
         // Collect preserved file changes for dry-run display
         const preservedFileChanges = updateResults

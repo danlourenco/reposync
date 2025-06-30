@@ -82,22 +82,8 @@ export class ActionHandler {
       }
     }
 
-    // Update the value  
-    const newValue = currentValue.replace(
-      new RegExp(action.version_pattern),
-      (match, g1, g2, g3) => {
-        // For pattern (v)([0-9]+\.[0-9]+\.[0-9]+)$:
-        // g1 = "v", g2 = "1.0.0", g3 = undefined
-        if (g3 !== undefined) {
-          return `${g1}${newVersion}${g3}`
-        } else if (g2 !== undefined) {
-          return `${g1}${newVersion}`
-        } else if (g1 !== undefined) {
-          return `${newVersion}`
-        }
-        return newVersion
-      }
-    )
+    // Update the value by replacing the old version with new version
+    const newValue = currentValue.replace(currentVersion, newVersion)
 
     this.setNestedValue(data, action.key, newValue)
     
