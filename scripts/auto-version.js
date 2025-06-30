@@ -162,14 +162,14 @@ function updatePackageVersion(packagePath, newVersion) {
 /**
  * Update all package.json files with new version
  */
-function updateAllPackageVersions(newVersion) {
+async function updateAllPackageVersions(newVersion) {
   console.log(`📦 Updating package versions to ${newVersion}`)
   
   // Update root package.json
   updatePackageVersion(join(rootDir, 'package.json'), newVersion)
   
   // Update workspace packages
-  const workspacePackages = glob.sync('packages/*/package.json', { cwd: rootDir })
+  const workspacePackages = await glob('packages/*/package.json', { cwd: rootDir })
   for (const packagePath of workspacePackages) {
     updatePackageVersion(join(rootDir, packagePath), newVersion)
   }
@@ -282,7 +282,7 @@ async function main() {
     buildAllPackages()
 
     // Update package versions across monorepo
-    updateAllPackageVersions(nextVersion)
+    await updateAllPackageVersions(nextVersion)
 
     // Generate unified changelog
     generateChangelog(nextVersion)
