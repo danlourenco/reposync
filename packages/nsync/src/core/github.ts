@@ -406,7 +406,7 @@ export class GitHubService {
     // Extract repo name from URL for cleaner display
     const repoName = sourceRepo.replace(/.*github\.com[:/]([^/]+\/[^/]+)(\.git)?$/, '$1').replace(/\.git$/, '')
     
-    return `## 🔄 NSYNC Repository Synchronization
+    return `## 🔄 *NSYNC Repository Synchronization
 
 **Source Tag:** \`${sourceTag}\`  
 **Sync Timestamp:** \`${timestamp}\`  

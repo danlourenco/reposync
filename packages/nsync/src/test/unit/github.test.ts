@@ -14,7 +14,7 @@ const mockOctokit = {
     pulls: {
       create: vi.fn()
     },
-    user: {
+    users: {
       getAuthenticated: vi.fn()
     }
   }
@@ -315,7 +315,7 @@ describe('GitHubService', () => {
   describe('validateAuthentication', () => {
     it('should return true for valid authentication', async () => {
       const mockResponse = testHelpers.createMockGitHubResponses()
-      mockOctokit.rest.user.getAuthenticated.mockResolvedValue({
+      mockOctokit.rest.users.getAuthenticated.mockResolvedValue({
         data: mockResponse.user
       })
 
@@ -325,7 +325,7 @@ describe('GitHubService', () => {
     })
 
     it('should return false for invalid authentication', async () => {
-      mockOctokit.rest.user.getAuthenticated.mockRejectedValue(new Error('Unauthorized'))
+      mockOctokit.rest.users.getAuthenticated.mockRejectedValue(new Error('Unauthorized'))
 
       const result = await githubService.validateAuthentication()
       
@@ -336,7 +336,7 @@ describe('GitHubService', () => {
   describe('getAuthenticatedUser', () => {
     it('should return user information', async () => {
       const mockResponse = testHelpers.createMockGitHubResponses()
-      mockOctokit.rest.user.getAuthenticated.mockResolvedValue({
+      mockOctokit.rest.users.getAuthenticated.mockResolvedValue({
         data: mockResponse.user
       })
 
@@ -349,7 +349,7 @@ describe('GitHubService', () => {
     })
 
     it('should use login as name fallback', async () => {
-      mockOctokit.rest.user.getAuthenticated.mockResolvedValue({
+      mockOctokit.rest.users.getAuthenticated.mockResolvedValue({
         data: { login: 'testuser', name: null }
       })
 

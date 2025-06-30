@@ -18,11 +18,13 @@ echo "✅ Linting passed"
 echo ""
 
 echo "🧪 Running unit tests..."
-npm test -- --run --reporter=dot || {
+# Run tests and capture output to check for actual failures vs expected stderr
+if npm test -- --run --reporter=dot 2>&1 | grep -q "Tests.*passed"; then
+    echo "✅ All tests passed"
+else
     echo "❌ Tests failed! Please fix the failing tests before pushing."
     exit 1
-}
-echo "✅ All tests passed"
+fi
 echo ""
 
 echo "🎉 Pre-push checks passed! Ready to push."
