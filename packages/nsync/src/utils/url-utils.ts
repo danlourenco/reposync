@@ -1,4 +1,4 @@
-import { parseURL, withoutTrailingSlash, joinURL } from 'ufo'
+import { parseURL, joinURL } from 'ufo'
 
 export interface ParsedRepository {
   host: string

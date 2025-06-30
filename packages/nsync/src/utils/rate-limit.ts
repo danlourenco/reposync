@@ -10,14 +10,14 @@ interface RateLimitConfig {
 }
 
 // Store for debounced functions by key
-const debouncedFunctions = new Map<string, Function>()
+const debouncedFunctions = new Map<string, (...args: any[]) => any>()
 
 export function createRateLimitedGitHubClient(
   fetchFn: (...args: any[]) => Promise<any>, 
   options: RateLimitOptions = {}
 ): (endpoint: string) => Promise<any> {
   const { delay = 100 } = options
-  const pendingCalls = new Map<string, { promise?: Promise<any>, calls: Array<{resolve: Function, reject: Function}> }>()
+  const pendingCalls = new Map<string, { promise?: Promise<any>, calls: Array<{resolve: (value: any) => void, reject: (reason?: any) => void}> }>()
   
   return (endpoint: string) => {
     return new Promise((resolve, reject) => {
@@ -26,7 +26,7 @@ export function createRateLimitedGitHubClient(
       }
       
       const pending = pendingCalls.get(endpoint)!
-      pending.calls.push({ resolve, reject })
+      pending.calls.push({ resolve: resolve as (value: any) => void, reject: reject as (reason?: any) => void })
       
       // If there's already a debounced call in progress, join it
       if (pending.promise) {
@@ -67,7 +67,7 @@ export function createDebouncedLogger(
 interface RateLimiterState {
   requests: number
   resetTime: number
-  queue: Array<{ resolve: Function; reject: Function; args: any[] }>
+  queue: Array<{ resolve: (value: any) => void; reject: (reason?: any) => void; args: any[] }>
 }
 
 const rateLimiters = new Map<string, RateLimiterState>()
@@ -121,7 +121,7 @@ export function rateLimitedFetch(
 
 function processQueue(
   domain: string, 
-  fetchFn: Function, 
+  fetchFn: (...args: any[]) => Promise<any>, 
   maxRequests: number,
   windowMs: number
 ) {

@@ -7,7 +7,6 @@ export const testWizardCommand = defineCommand({
   meta: {
     name: 'test-wizard',
     description: 'Test the interactive configuration wizard (development only)',
-    hidden: true
   },
   args: {
     config: {

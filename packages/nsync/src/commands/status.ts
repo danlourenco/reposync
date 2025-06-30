@@ -1,7 +1,7 @@
 import { defineCommand } from 'citty'
 import { ConfigManager } from '../core/config.js'
 import { SystemValidator } from '../utils/validator.js'
-import consola, { configLogger, log } from '../utils/logger.js'
+import { configLogger } from '../utils/logger.js'
 
 export const statusCommand = defineCommand({
   meta: {

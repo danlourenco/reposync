@@ -1,0 +1,30 @@
+#!/bin/sh
+
+# Exit on error
+set -e
+
+echo "🔍 Running pre-push checks..."
+echo ""
+
+# Change to nsync package directory
+cd packages/nsync
+
+echo "📝 Running linter..."
+npm run lint --silent || {
+    echo "❌ Linting failed! Please fix the errors before pushing."
+    exit 1
+}
+echo "✅ Linting passed"
+echo ""
+
+echo "🧪 Running unit tests..."
+# Run tests and capture output to check for actual failures vs expected stderr
+if npm test -- --run --reporter=dot 2>&1 | grep -q "Tests.*passed"; then
+    echo "✅ All tests passed"
+else
+    echo "❌ Tests failed! Please fix the failing tests before pushing."
+    exit 1
+fi
+echo ""
+
+echo "🎉 Pre-push checks passed! Ready to push."

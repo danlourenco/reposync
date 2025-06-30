@@ -1,0 +1,115 @@
+# Example augmentation rules configuration for RepoSync
+# 
+# This file demonstrates how to configure rules for augmenting files
+# during repository synchronization. Rules can be placed in:
+# - ~/.reposync/rules.yaml (global user rules)
+# - ./.reposync/rules.yaml (project-specific rules)
+# - Or loaded via REPOSYNC_RULES_PATH environment variable
+#
+# Each rule defines:
+# - Target files to match (using glob patterns)
+# - Conditions that must be met
+# - Actions to perform when conditions are satisfied
+
+file_augmentation:
+  rules:
+    # Example 1: Update version in configuration files
+    - name: "Update config.yml version"
+      description: "Updates version number in config.yml files"
+      enabled: true
+      target_files:
+        - "config.yml"
+        - "config.yaml"
+      conditions:
+        # Check if the file has a specific key
+        - type: "yaml_has_key"
+          key: "version"
+      actions:
+        # Replace the version value
+        - type: "replace_value"
+          path: "version"
+          value: "{{version}}"
+    
+    # Example 2: Update artifact versions in deployment configs
+    - name: "Update deployment artifacts"
+      description: "Updates artifact versions in deployment configuration"
+      enabled: true
+      target_files:
+        - "deploy/*.yml"
+        - "deploy/*.yaml"
+      conditions:
+        # Check if remote_artifact key exists
+        - type: "yaml_has_key"
+          key: "remote_artifact"
+        # Check if the value matches a version pattern
+        - type: "value_matches"
+          path: "remote_artifact"
+          pattern: ".*-\\d+\\.\\d+\\.\\d+\\.(zip|jar|tar\\.gz)$"
+      actions:
+        # Update the version in the artifact name
+        - type: "update_version_in_value"
+          path: "remote_artifact"
+          pattern: "(.*-)\\d+\\.\\d+\\.\\d+(\\.(zip|jar|tar\\.gz))$"
+          version: "{{version}}"
+    
+    # Example 3: Update package.json versions
+    - name: "Update package.json version"
+      description: "Updates version in package.json files"
+      enabled: true
+      target_files:
+        - "package.json"
+        - "**/package.json"
+      conditions:
+        - type: "json_has_key"
+          key: "version"
+      actions:
+        - type: "replace_value"
+          path: "version"
+          value: "{{version}}"
+    
+    # Example 4: Add metadata to config files
+    - name: "Add sync metadata"
+      description: "Adds metadata about the sync operation"
+      enabled: false  # Disabled by default
+      target_files:
+        - "**/*.config.yml"
+      conditions:
+        - type: "yaml_has_key"
+          key: "metadata"
+      actions:
+        - type: "replace_value"
+          path: "metadata.last_sync"
+          value: "{{sync_timestamp}}"
+        - type: "replace_value"
+          path: "metadata.sync_version"
+          value: "{{version}}"
+        - type: "replace_value"
+          path: "metadata.sync_tag"
+          value: "{{tag}}"
+    
+    # Example 5: Update Docker image tags
+    - name: "Update Docker image versions"
+      description: "Updates Docker image tags in compose files"
+      enabled: true
+      target_files:
+        - "docker-compose.yml"
+        - "docker-compose.yaml"
+        - "docker-compose.*.yml"
+      conditions:
+        - type: "yaml_has_key"
+          key: "services"
+      actions:
+        # This would need a custom action in a real implementation
+        # to iterate through services and update image tags
+        - type: "custom"
+          handler: "update_docker_tags"
+          config:
+            tag_pattern: "{{version}}"
+
+# Template variables available in actions:
+# - {{version}} - The version number (without 'v' prefix)
+# - {{tag}} - The full git tag (e.g., 'v2.1.0')
+# - {{tag_without_v}} - Same as version
+# - {{sync_version}} - Same as version
+# - {{sync_timestamp}} - ISO timestamp of the sync operation
+# - Any custom variables defined in sync config

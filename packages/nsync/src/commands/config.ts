@@ -27,15 +27,15 @@ export const configCommand = defineCommand({
       },
       async run({ args }) {
         try {
-          const configManager = new ConfigManager({ configPath: args.config })
+          const configManager = new ConfigManager({ configPath: args.config as string | undefined })
           const config = await configManager.load()
 
           if (!config) {
-            log.warning('No configuration found')
+            log.warn('No configuration found')
             return
           }
 
-          if (args.json) {
+          if (args.json as boolean) {
             console.log(JSON.stringify(config, null, 2))
           } else {
             log.info('Current configuration:')
@@ -72,10 +72,10 @@ export const configCommand = defineCommand({
       },
       async run({ args }) {
         try {
-          const configManager = new ConfigManager({ configPath: args.config })
+          const configManager = new ConfigManager({ configPath: args.config as string | undefined })
           const configService = new ConfigService(configManager)
 
-          await configService.createInteractiveConfig({ force: args.force })
+          await configService.createInteractiveConfig({ force: args.force as boolean | undefined })
           log.success('Configuration updated successfully')
         } catch (error) {
           log.error('Failed to set configuration:', error instanceof Error ? error.message : String(error))
@@ -103,10 +103,10 @@ export const configCommand = defineCommand({
       },
       async run({ args }) {
         try {
-          const configManager = new ConfigManager({ configPath: args.config })
+          const configManager = new ConfigManager({ configPath: args.config as string | undefined })
           const configService = new ConfigService(configManager)
 
-          const isValid = await configService.validateConfig({ verbose: args.verbose })
+          const isValid = await configService.validateConfig({ verbose: args.verbose as boolean | undefined })
           
           if (isValid) {
             log.success('Configuration is valid')

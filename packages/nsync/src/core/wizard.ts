@@ -9,10 +9,13 @@
 import search from '@inquirer/search'
 import { GitHubService } from './github.js'
 import { ConfigManager } from './config.js'
-import { SyncConfig, TargetRepository, FilePreservationRule, GitTag } from './types.js'
+import { SyncConfig, TargetRepository } from './types.js'
 import consola, { wizardLogger, operation } from '../utils/logger.js'
 import { execSync } from 'child_process'
 import boxen from 'boxen'
+
+// Type alias for file preservation rules matching SyncConfig expectations
+type WizardFilePreservationRule = NonNullable<SyncConfig['file_preservation']>[number]
 
 /**
  * Repository option for selection prompts
@@ -432,9 +435,10 @@ export class ConfigurationWizard {
     // Convert to TargetRepository format with custom names
     const targetRepos: TargetRepository[] = []
     
-    for (const repoUrl of selectedRepos) {
+    for (const repoItem of selectedRepos) {
+      const repoUrl = typeof repoItem === 'string' ? repoItem : repoItem.value
       const repoOption = repositories.find(r => r.value === repoUrl)
-      const defaultName = repoOption?.name || repoUrl.split('/').pop()?.replace('.git', '') || 'Repository'
+      const defaultName = repoOption?.name || (repoUrl.split('/').pop()?.replace('.git', '') || 'Repository')
       
       const customName = await consola.prompt(`Enter display name for ${defaultName}:`, {
         type: 'text',
@@ -506,7 +510,7 @@ export class ConfigurationWizard {
       })
 
       if (!addAnother) break
-    } while (true)
+    } while (targetRepos.length < 100) // Reasonable limit to avoid infinite loops
 
     return targetRepos
   }
@@ -554,7 +558,7 @@ export class ConfigurationWizard {
   /**
    * Configure file preservation rules
    */
-  private async configureFilePreservation(): Promise<FilePreservationRule[]> {
+  private async configureFilePreservation(): Promise<WizardFilePreservationRule[]> {
     wizardLogger.info('🔄 Configuring file preservation...')
 
     const useFilePreservation = await consola.prompt('Configure file preservation rules? (Recommended)', {
@@ -579,16 +583,16 @@ export class ConfigurationWizard {
         description: 'Preserve and update infrastructure configuration files',
         update_rules: [{
           name: 'artifact_versions',
-          type: 'pattern',
+          type: 'pattern' as const,
           pattern: '{prefix}-{version}.{ext}',
           fields: ['remote_artifact', 'backup_tool'],
-          version_strategy: 'replace_if_newer'
+          version_strategy: 'replace_if_newer' as const
         }]
       }]
     }
 
     // Custom file preservation rules
-    const rules: FilePreservationRule[] = []
+    const rules: WizardFilePreservationRule[] = []
     
     wizardLogger.info('Custom file preservation configuration is available but complex.')
     wizardLogger.info('For now, you can manually edit the configuration file after setup.')
@@ -703,7 +707,7 @@ export class ConfigurationWizard {
   /**
    * Test the configuration
    */
-  private async testConfiguration(config: SyncConfig): Promise<void> {
+  private async testConfiguration(_config: SyncConfig): Promise<void> {
     const runTest = await consola.prompt('Test the configuration with a dry-run sync?', {
       type: 'confirm',
       initial: true,

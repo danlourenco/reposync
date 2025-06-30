@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Pre-commit hook that runs linting
+# Note: This runs on all files, not just staged ones
+# For staged-only linting, consider using lint-staged
+
+echo "🔍 Running pre-commit checks..."
+
+# Change to nsync package directory
+cd packages/nsync
+
+# Run linter but don't fail commits for warnings
+echo "📝 Checking code style..."
+npm run lint --silent || {
+    echo "⚠️  Linting issues found. Please review and fix if needed."
+    echo "   (Commit will proceed, but consider fixing before push)"
+}
+
+echo "✅ Pre-commit check complete"

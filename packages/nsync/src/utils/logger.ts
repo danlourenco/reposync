@@ -49,12 +49,20 @@ export const operation = {
 }
 
 // Legacy compatibility layer (will phase out)
-export const log = {
-  info: consola.info.bind(consola),
-  success: consola.success.bind(consola),
-  warn: consola.warn.bind(consola),
-  error: consola.error.bind(consola),
-  debug: consola.debug.bind(consola),
+export const log: {
+  info: (message: string, ...args: any[]) => void
+  success: (message: string, ...args: any[]) => void
+  warn: (message: string, ...args: any[]) => void
+  error: (message: string, ...args: any[]) => void
+  debug: (message: string, ...args: any[]) => void
+  step: (message: string, ...args: any[]) => void
+  dryRun: (message: string, ...args: any[]) => void
+} = {
+  info: (message: string, ...args: any[]) => consola.info(message, ...args),
+  success: (message: string, ...args: any[]) => consola.success(message, ...args),
+  warn: (message: string, ...args: any[]) => consola.warn(message, ...args),
+  error: (message: string, ...args: any[]) => consola.error(message, ...args),
+  debug: (message: string, ...args: any[]) => consola.debug(message, ...args),
   step: (message: string, ...args: any[]) => consola.info(`🔄 ${message}`, ...args),
   dryRun: (message: string, ...args: any[]) => consola.info(`🔍 Preview: ${message}`, ...args)
 }

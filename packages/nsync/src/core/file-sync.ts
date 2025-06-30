@@ -1,9 +1,11 @@
 import { cp, readdir, stat, readFile, writeFile, mkdir } from 'fs/promises'
-import { join, resolve, relative, dirname } from 'pathe'
+import { join, relative, dirname } from 'pathe'
 import { existsSync } from 'fs'
-import consola, { fileLogger, log } from '../utils/logger.js'
+import { fileLogger } from '../utils/logger.js'
 import { RepoSyncError } from './types.js'
 import { FileUpdateService, type FilePreservationRule } from './file-update.js'
+import { AugmentationEngine } from './augmentation/augmentation-engine.js'
+import { RuleLoader } from './augmentation/rule-loader.js'
 
 /**
  * Options for directory synchronization
@@ -88,9 +90,13 @@ export class FileSyncService {
   ]
 
   private fileUpdateService: FileUpdateService
+  private augmentationEngine: AugmentationEngine
+  private ruleLoader: RuleLoader
 
   constructor(filePreservationRules: FilePreservationRule[] = []) {
     this.fileUpdateService = new FileUpdateService(filePreservationRules)
+    this.ruleLoader = new RuleLoader()
+    this.augmentationEngine = new AugmentationEngine()
   }
 
   /**
@@ -379,6 +385,95 @@ export class FileSyncService {
       },
       dryRun
     )
+  }
+
+  /**
+   * Update files using augmentation rules
+   * 
+   * Applies rule-based augmentation to files in the target directory using
+   * the configured augmentation engine. This provides a flexible way to update
+   * files based on external configuration without hardcoding company-specific logic.
+   * 
+   * @param targetDir - Directory containing files to augment
+   * @param context - Context object with template variables (tag, version, etc.)
+   * @param dryRun - Whether to preview changes without applying them
+   * @returns Promise resolving to number of files updated
+   * 
+   * @example
+   * ```typescript
+   * const updatedCount = await fileSyncService.augmentFiles(
+   *   '/tmp/target-repo',
+   *   { tag: 'v2.1.0', version: '2.1.0' },
+   *   false
+   * )
+   * 
+   * console.log(`Augmented ${updatedCount} files`)
+   * ```
+   */
+  async augmentFiles(
+    targetDir: string,
+    context: Record<string, any>,
+    dryRun = false
+  ): Promise<number> {
+    fileLogger.info(`🔄 ${dryRun ? 'Previewing' : 'Applying'} file augmentation rules`)
+    
+    try {
+      // Initialize augmentation engine
+      await this.augmentationEngine.initialize()
+      
+      // Load augmentation rules
+      const rules = await this.ruleLoader.loadRules()
+      
+      if (rules.length === 0) {
+        fileLogger.debug('No augmentation rules configured')
+        return 0
+      }
+      
+      fileLogger.info(`🔄 ${dryRun ? 'Previewing' : 'Processing'} file updates with ${rules.length} rules`)
+      
+      let updatedCount = 0
+      
+      // Process each file that has matching rules
+      const files = await this.getAllFiles(targetDir)
+      
+      for (const filePath of files) {
+        const relativePath = relative(targetDir, filePath)
+        const matchingRules = this.ruleLoader.getRulesByFile(relativePath)
+        
+        if (matchingRules.length > 0) {
+          const content = await readFile(filePath, 'utf-8')
+          const result = await this.augmentationEngine.processFile(
+            content,
+            filePath,
+            context
+          )
+          
+          if (result.changed) {
+            if (!dryRun) {
+              await writeFile(filePath, result.newContent, 'utf-8')
+              fileLogger.success(`Updated ${relativePath}`)
+            } else {
+              fileLogger.info(`Would update ${relativePath}`)
+            }
+            
+            // Log changes
+            result.changes.forEach(change => {
+              fileLogger.debug(`  - ${change.description}`)
+            })
+            
+            updatedCount++
+          }
+        }
+      }
+      
+      fileLogger.info(`${dryRun ? 'Would update' : 'Updated'} ${updatedCount} files with ${updatedCount === 0 ? 'no' : ''} changes`)
+      
+      return updatedCount
+    } catch (error) {
+      fileLogger.warn('Error applying augmentation rules:', error)
+      // Don't throw - augmentation is optional enhancement
+      return 0
+    }
   }
 
   /**

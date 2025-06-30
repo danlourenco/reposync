@@ -1,8 +1,8 @@
-import { simpleGit, SimpleGit, CleanOptions } from 'simple-git'
-import { resolve, join } from 'pathe'
+import { simpleGit, SimpleGit } from 'simple-git'
+import { join } from 'pathe'
 import { mkdtemp, rm } from 'fs/promises'
 import { tmpdir } from 'os'
-import consola, { gitLogger, log } from '../utils/logger.js'
+import { gitLogger } from '../utils/logger.js'
 import { RepoSyncError } from './types.js'
 
 /**

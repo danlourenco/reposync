@@ -1,6 +1,5 @@
 import { ConfigManager } from './config.js'
 import { ConfigurationWizard } from './wizard.js'
-import { SyncConfig, TargetRepository } from './types.js'
 import log from '../utils/logger.js'
 
 export class ConfigService {
