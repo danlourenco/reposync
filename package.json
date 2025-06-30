@@ -1,6 +1,6 @@
 {
   "name": "reposync",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Multi-repository synchronization tool - monorepo with different implementations",
   "private": true,
   "type": "module",

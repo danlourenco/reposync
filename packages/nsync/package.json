@@ -1,6 +1,6 @@
 {
   "name": "@reposync/nsync",
-  "version": "0.1.2",
+  "version": "1.1.0",
   "description": "🎤 Multi-repository synchronization tool - *NSYNC style! 🕺",
   "type": "module",
   "bin": {
