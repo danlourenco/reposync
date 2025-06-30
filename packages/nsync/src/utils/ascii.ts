@@ -34,7 +34,7 @@ export async function createNsyncLogo(): Promise<string> {
     })
     
     return coloredLines.join('\n')
-  } catch (error) {
+  } catch {
     // Fallback to 5 Line Oblique if Big Money-nw fails
     try {
       const fallbackText = await figletAsync('NSYNC')

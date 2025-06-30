@@ -213,7 +213,7 @@ export class ConfigurationWizard {
         try {
           const token = execSync('gh auth token', { encoding: 'utf-8', stdio: 'pipe' }).trim()
           return { authenticated: true, username: ghUsername, token }
-        } catch (error) {
+        } catch {
           consola.warn('Failed to get GitHub CLI token, trying without token')
           return { authenticated: true, username: ghUsername }
         }
@@ -268,7 +268,7 @@ export class ConfigurationWizard {
       const user = await tempService.getAuthenticatedUser()
       wizardLogger.success(`✓ Successfully authenticated as ${user.name || user.login}`)
       return { authenticated: true, username: user.login, token }
-    } catch (error) {
+    } catch {
       throw new Error('Invalid token or network error. Please check your token and try again.')
     }
   }
@@ -288,7 +288,7 @@ export class ConfigurationWizard {
       wizardLogger.success(`✓ Successfully authenticated as ${username}`)
       
       return { authenticated: true, username, token }
-    } catch (error) {
+    } catch {
       throw new Error('GitHub CLI authentication failed')
     }
   }
@@ -326,7 +326,7 @@ export class ConfigurationWizard {
       const user = await tempService.getAuthenticatedUser()
       wizardLogger.success(`✓ Successfully authenticated to ${hostname} as ${user.name || user.login}`)
       return { authenticated: true, username: user.login, token, apiUrl }
-    } catch (error) {
+    } catch {
       throw new Error(`Failed to authenticate with ${hostname}. Please check your hostname and token.`)
     }
   }
@@ -535,7 +535,7 @@ export class ConfigurationWizard {
           private: repo.private,
           archived: repo.archived
         }))
-    } catch (error) {
+    } catch {
       wizardLogger.warn('Failed to fetch repositories. You\'ll need to enter URLs manually.')
       return []
     }
