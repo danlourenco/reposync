@@ -14,7 +14,13 @@
     "clean": "npm run clean --workspaces",
     "dev": "npm run dev --workspaces",
     "prepare": "husky",
-    "pre-push": "npm run lint && npm run test"
+    "pre-push": "npm run lint && npm run test",
+    "version:patch": "node scripts/auto-version.js --force-type=patch",
+    "version:minor": "node scripts/auto-version.js --force-type=minor",
+    "version:major": "node scripts/auto-version.js --force-type=major",
+    "version:auto": "node scripts/auto-version.js",
+    "version:dry-run": "node scripts/auto-version.js --dry-run",
+    "release": "npm run version:auto"
   },
   "keywords": [
     "git",

@@ -1,0 +1,72 @@
+#!/bin/sh
+
+# Post-merge hook for automated versioning on main branch
+# Triggers semantic versioning and changelog generation after merges to main
+
+echo "🔄 Post-merge hook triggered"
+
+# Check if we're on main branch
+BRANCH=$(git branch --show-current)
+if [ "$BRANCH" != "main" ]; then
+  echo "📋 Not on main branch ($BRANCH), skipping auto-versioning"
+  exit 0
+fi
+
+# Check if this was a merge commit (has multiple parents)
+MERGE_COMMIT=$(git log -1 --merges --pretty=format:"%H")
+LATEST_COMMIT=$(git rev-parse HEAD)
+
+if [ "$MERGE_COMMIT" != "$LATEST_COMMIT" ]; then
+  echo "📋 Not a merge commit, skipping auto-versioning"
+  exit 0
+fi
+
+echo "🚀 Merge to main detected, analyzing commits for auto-versioning..."
+
+# Get commits from the merge
+MERGE_BASE=$(git merge-base HEAD~1 HEAD~2)
+COMMITS=$(git log ${MERGE_BASE}..HEAD~1 --oneline --no-merges)
+
+if [ -z "$COMMITS" ]; then
+  echo "📋 No new commits in merge, skipping versioning"
+  exit 0
+fi
+
+echo "📊 Commits in merge:"
+echo "$COMMITS"
+
+# Check if commits follow conventional commit format and should trigger release
+SHOULD_RELEASE=false
+
+echo "$COMMITS" | while read commit; do
+  if echo "$commit" | grep -qE "^[a-f0-9]+ (feat|fix|perf|BREAKING CHANGE)"; then
+    SHOULD_RELEASE=true
+    break
+  fi
+done
+
+if [ "$SHOULD_RELEASE" = "false" ]; then
+  echo "📋 No release-triggering commits found (feat:, fix:, perf:, BREAKING CHANGE), skipping auto-versioning"
+  exit 0
+fi
+
+echo "🎯 Release-triggering commits detected, running automated versioning..."
+
+# Run the automated versioning script
+if node scripts/auto-version.js; then
+  echo "✅ Automated versioning completed successfully"
+  
+  # Get the new version for notification
+  NEW_VERSION=$(node -e "console.log(require('./package.json').version)")
+  echo "🎉 Released version: v$NEW_VERSION"
+  
+  # Push the new version and tag
+  echo "📤 Pushing release to remote..."
+  git push origin main
+  git push origin "v$NEW_VERSION"
+  
+  echo "🎊 Automated release complete!"
+else
+  echo "❌ Automated versioning failed"
+  exit 1
+fi

@@ -596,7 +596,7 @@ export class ConfigurationWizard {
     
     wizardLogger.info('Custom file preservation configuration is available but complex.')
     wizardLogger.info('For now, you can manually edit the configuration file after setup.')
-    wizardLogger.info('See docs/FILE_UPDATE_DSL.md for detailed documentation.')
+    wizardLogger.info('See docs/file-augmentation.md for detailed documentation.')
 
     return rules
   }
