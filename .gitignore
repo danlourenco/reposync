@@ -27,3 +27,6 @@ coverage/
 *.tmp
 *.temp
 .cache/
+
+# Package node_modules
+packages/*/node_modules/
