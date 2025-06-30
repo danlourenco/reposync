@@ -143,9 +143,13 @@ Update if the new version is higher than or equal to the current version.
 
 ### Built-in Variables
 - `{tag}` - Full git tag (e.g., `v2.1.0`)
-- `{tag_without_v}` - Tag without 'v' prefix (e.g., `2.1.0`)
-- `{version}` - Same as `{tag_without_v}`
-- `{sync_version}` - Same as `{version}` (used in some examples)
+- `{tag_without_v}` - Version without 'v' prefix (e.g., `2.1.0`)
+
+### Pattern-Specific Variables
+Used in pattern matching rules (`type: "pattern"`):
+- `{prefix}` - Text before version in pattern (e.g., `my-api`)
+- `{version}` - Version component in pattern (e.g., `1.2.3`)
+- `{ext}` - File extension in pattern (e.g., `.zip`)
 
 ### Template Processing
 
